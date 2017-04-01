@@ -15,30 +15,30 @@
  under the License.
  */
 
-#import "CDVInAppBrowser.h"
+#import "JnBrowser.h"
 #import <Cordova/CDVPluginResult.h>
 #import <Cordova/CDVUserAgentUtil.h>
 
-#define    kInAppBrowserTargetSelf @"_self"
-#define    kInAppBrowserTargetSystem @"_system"
-#define    kInAppBrowserTargetBlank @"_blank"
+#define    kJnBrowserTargetSelf @"_self"
+#define    kJnBrowserTargetSystem @"_system"
+#define    kJnBrowserTargetBlank @"_blank"
 
-#define    kInAppBrowserToolbarBarPositionBottom @"bottom"
-#define    kInAppBrowserToolbarBarPositionTop @"top"
+#define    kJnBrowserToolbarBarPositionBottom @"bottom"
+#define    kJnBrowserToolbarBarPositionTop @"top"
 
 #define    TOOLBAR_HEIGHT 44.0
 #define    STATUSBAR_HEIGHT 20.0
 #define    LOCATIONBAR_HEIGHT 21.0
 #define    FOOTER_HEIGHT ((TOOLBAR_HEIGHT) + (LOCATIONBAR_HEIGHT))
 
-#pragma mark CDVInAppBrowser
+#pragma mark JnBrowser
 
-@interface CDVInAppBrowser () {
+@interface JnBrowser () {
     NSInteger _previousStatusBarStyle;
 }
 @end
 
-@implementation CDVInAppBrowser
+@implementation JnBrowser
 
 - (void)pluginInitialize
 {
@@ -58,12 +58,12 @@
 
 - (void)close:(CDVInvokedUrlCommand*)command
 {
-    if (self.inAppBrowserViewController == nil) {
+    if (self.JnBrowserViewController == nil) {
         NSLog(@"IAB.close() called but it was already closed.");
         return;
     }
     // Things are cleaned up in browserExit.
-    [self.inAppBrowserViewController close];
+    [self.JnBrowserViewController close];
 }
 
 - (BOOL) isSystemUrl:(NSURL*)url
@@ -80,7 +80,7 @@
     CDVPluginResult* pluginResult;
 
     NSString* url = [command argumentAtIndex:0];
-    NSString* target = [command argumentAtIndex:1 withDefault:kInAppBrowserTargetSelf];
+    NSString* target = [command argumentAtIndex:1 withDefault:kJnBrowserTargetSelf];
     NSString* options = [command argumentAtIndex:2 withDefault:@"" andClass:[NSString class]];
 
     self.callbackId = command.callbackId;
@@ -94,15 +94,15 @@
         NSURL* absoluteUrl = [[NSURL URLWithString:url relativeToURL:baseUrl] absoluteURL];
 
         if ([self isSystemUrl:absoluteUrl]) {
-            target = kInAppBrowserTargetSystem;
+            target = kJnBrowserTargetSystem;
         }
 
-        if ([target isEqualToString:kInAppBrowserTargetSelf]) {
+        if ([target isEqualToString:kJnBrowserTargetSelf]) {
             [self openInCordovaWebView:absoluteUrl withOptions:options];
-        } else if ([target isEqualToString:kInAppBrowserTargetSystem]) {
+        } else if ([target isEqualToString:kJnBrowserTargetSystem]) {
             [self openInSystem:absoluteUrl];
         } else { // _blank or anything else
-            [self openInInAppBrowser:absoluteUrl withOptions:options];
+            [self openInJnBrowser:absoluteUrl withOptions:options];
         }
 
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -114,9 +114,9 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)openInInAppBrowser:(NSURL*)url withOptions:(NSString*)options
+- (void)openInJnBrowser:(NSURL*)url withOptions:(NSString*)options
 {
-    CDVInAppBrowserOptions* browserOptions = [CDVInAppBrowserOptions parseOptions:options];
+    JnBrowserOptions* browserOptions = [JnBrowserOptions parseOptions:options];
 
     if (browserOptions.clearcache) {
         NSHTTPCookie *cookie;
@@ -140,7 +140,7 @@
         }
     }
 
-    if (self.inAppBrowserViewController == nil) {
+    if (self.JnBrowserViewController == nil) {
         NSString* userAgent = [CDVUserAgentUtil originalUserAgent];
         NSString* overrideUserAgent = [self settingForKey:@"OverrideUserAgent"];
         NSString* appendUserAgent = [self settingForKey:@"AppendUserAgent"];
@@ -150,18 +150,18 @@
         if(appendUserAgent){
             userAgent = [userAgent stringByAppendingString: appendUserAgent];
         }
-        self.inAppBrowserViewController = [[CDVInAppBrowserViewController alloc] initWithUserAgent:userAgent prevUserAgent:[self.commandDelegate userAgent] browserOptions: browserOptions];
-        self.inAppBrowserViewController.navigationDelegate = self;
+        self.JnBrowserViewController = [[JnBrowserViewController alloc] initWithUserAgent:userAgent prevUserAgent:[self.commandDelegate userAgent] browserOptions: browserOptions];
+        self.JnBrowserViewController.navigationDelegate = self;
 
         if ([self.viewController conformsToProtocol:@protocol(CDVScreenOrientationDelegate)]) {
-            self.inAppBrowserViewController.orientationDelegate = (UIViewController <CDVScreenOrientationDelegate>*)self.viewController;
+            self.JnBrowserViewController.orientationDelegate = (UIViewController <CDVScreenOrientationDelegate>*)self.viewController;
         }
     }
 
-    [self.inAppBrowserViewController showLocationBar:browserOptions.location];
-    [self.inAppBrowserViewController showToolBar:browserOptions.toolbar :browserOptions.toolbarposition];
+    [self.JnBrowserViewController showLocationBar:browserOptions.location];
+    [self.JnBrowserViewController showToolBar:browserOptions.toolbar :browserOptions.toolbarposition];
     if (browserOptions.closebuttoncaption != nil) {
-        [self.inAppBrowserViewController setCloseButtonTitle:browserOptions.closebuttoncaption];
+        [self.JnBrowserViewController setCloseButtonTitle:browserOptions.closebuttoncaption];
     }
     // Set Presentation Style
     UIModalPresentationStyle presentationStyle = UIModalPresentationFullScreen; // default
@@ -172,7 +172,7 @@
             presentationStyle = UIModalPresentationFormSheet;
         }
     }
-    self.inAppBrowserViewController.modalPresentationStyle = presentationStyle;
+    self.JnBrowserViewController.modalPresentationStyle = presentationStyle;
 
     // Set Transition Style
     UIModalTransitionStyle transitionStyle = UIModalTransitionStyleCoverVertical; // default
@@ -183,14 +183,14 @@
             transitionStyle = UIModalTransitionStyleCrossDissolve;
         }
     }
-    self.inAppBrowserViewController.modalTransitionStyle = transitionStyle;
+    self.JnBrowserViewController.modalTransitionStyle = transitionStyle;
 
     // prevent webView from bouncing
     if (browserOptions.disallowoverscroll) {
-        if ([self.inAppBrowserViewController.webView respondsToSelector:@selector(scrollView)]) {
-            ((UIScrollView*)[self.inAppBrowserViewController.webView scrollView]).bounces = NO;
+        if ([self.JnBrowserViewController.webView respondsToSelector:@selector(scrollView)]) {
+            ((UIScrollView*)[self.JnBrowserViewController.webView scrollView]).bounces = NO;
         } else {
-            for (id subview in self.inAppBrowserViewController.webView.subviews) {
+            for (id subview in self.JnBrowserViewController.webView.subviews) {
                 if ([[subview class] isSubclassOfClass:[UIScrollView class]]) {
                     ((UIScrollView*)subview).bounces = NO;
                 }
@@ -199,15 +199,15 @@
     }
 
     // UIWebView options
-    self.inAppBrowserViewController.webView.scalesPageToFit = browserOptions.enableviewportscale;
-    self.inAppBrowserViewController.webView.mediaPlaybackRequiresUserAction = browserOptions.mediaplaybackrequiresuseraction;
-    self.inAppBrowserViewController.webView.allowsInlineMediaPlayback = browserOptions.allowinlinemediaplayback;
+    self.JnBrowserViewController.webView.scalesPageToFit = browserOptions.enableviewportscale;
+    self.JnBrowserViewController.webView.mediaPlaybackRequiresUserAction = browserOptions.mediaplaybackrequiresuseraction;
+    self.JnBrowserViewController.webView.allowsInlineMediaPlayback = browserOptions.allowinlinemediaplayback;
     if (IsAtLeastiOSVersion(@"6.0")) {
-        self.inAppBrowserViewController.webView.keyboardDisplayRequiresUserAction = browserOptions.keyboarddisplayrequiresuseraction;
-        self.inAppBrowserViewController.webView.suppressesIncrementalRendering = browserOptions.suppressesincrementalrendering;
+        self.JnBrowserViewController.webView.keyboardDisplayRequiresUserAction = browserOptions.keyboarddisplayrequiresuseraction;
+        self.JnBrowserViewController.webView.suppressesIncrementalRendering = browserOptions.suppressesincrementalrendering;
     }
 
-    [self.inAppBrowserViewController navigateTo:url];
+    [self.JnBrowserViewController navigateTo:url];
     if (!browserOptions.hidden) {
         [self show:nil];
     }
@@ -215,7 +215,7 @@
 
 - (void)show:(CDVInvokedUrlCommand*)command
 {
-    if (self.inAppBrowserViewController == nil) {
+    if (self.JnBrowserViewController == nil) {
         NSLog(@"Tried to show IAB after it was closed.");
         return;
     }
@@ -226,17 +226,17 @@
 
     _previousStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
 
-    __block CDVInAppBrowserNavigationController* nav = [[CDVInAppBrowserNavigationController alloc]
-                                   initWithRootViewController:self.inAppBrowserViewController];
-    nav.orientationDelegate = self.inAppBrowserViewController;
+    __block JnBrowserNavigationController* nav = [[JnBrowserNavigationController alloc]
+                                   initWithRootViewController:self.JnBrowserViewController];
+    nav.orientationDelegate = self.JnBrowserViewController;
     nav.navigationBarHidden = YES;
-    nav.modalPresentationStyle = self.inAppBrowserViewController.modalPresentationStyle;
+    nav.modalPresentationStyle = self.JnBrowserViewController.modalPresentationStyle;
 
-    __weak CDVInAppBrowser* weakSelf = self;
+    __weak JnBrowser* weakSelf = self;
 
     // Run later to avoid the "took a long time" log message.
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (weakSelf.inAppBrowserViewController != nil) {
+        if (weakSelf.JnBrowserViewController != nil) {
             CGRect frame = [[UIScreen mainScreen] bounds];
             UIWindow *tmpWindow = [[UIWindow alloc] initWithFrame:frame];
             UIViewController *tmpController = [[UIViewController alloc] init];
@@ -251,7 +251,7 @@
 
 - (void)hide:(CDVInvokedUrlCommand*)command
 {
-    if (self.inAppBrowserViewController == nil) {
+    if (self.JnBrowserViewController == nil) {
         NSLog(@"Tried to hide IAB after it was closed.");
         return;
 
@@ -266,7 +266,7 @@
 
     // Run later to avoid the "took a long time" log message.
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.inAppBrowserViewController != nil) {
+        if (self.JnBrowserViewController != nil) {
             _previousStatusBarStyle = -1;
             [self.viewController dismissViewControllerAnimated:YES completion:nil];
         }
@@ -284,8 +284,8 @@
 #else
     if ([self.commandDelegate URLIsWhitelisted:url]) {
         [self.webView loadRequest:request];
-    } else { // this assumes the InAppBrowser can be excepted from the white-list
-        [self openInInAppBrowser:url withOptions:options];
+    } else { // this assumes the JnBrowser can be excepted from the white-list
+        [self openInJnBrowser:url withOptions:options];
     }
 #endif
 }
@@ -307,8 +307,8 @@
 
 - (void)injectDeferredObject:(NSString*)source withWrapper:(NSString*)jsWrapper
 {
-    // Ensure an iframe bridge is created to communicate with the CDVInAppBrowserViewController
-    [self.inAppBrowserViewController.webView stringByEvaluatingJavaScriptFromString:@"(function(d){_cdvIframeBridge=d.getElementById('_cdvIframeBridge');if(!_cdvIframeBridge) {var e = _cdvIframeBridge = d.createElement('iframe');e.id='_cdvIframeBridge'; e.style.display='none';d.body.appendChild(e);}})(document)"];
+    // Ensure an iframe bridge is created to communicate with the JnBrowserViewController
+    [self.JnBrowserViewController.webView stringByEvaluatingJavaScriptFromString:@"(function(d){_cdvIframeBridge=d.getElementById('_cdvIframeBridge');if(!_cdvIframeBridge) {var e = _cdvIframeBridge = d.createElement('iframe');e.id='_cdvIframeBridge'; e.style.display='none';d.body.appendChild(e);}})(document)"];
 
     if (jsWrapper != nil) {
         NSData* jsonData = [NSJSONSerialization dataWithJSONObject:@[source] options:0 error:nil];
@@ -316,10 +316,10 @@
         if (sourceArrayString) {
             NSString* sourceString = [sourceArrayString substringWithRange:NSMakeRange(1, [sourceArrayString length] - 2)];
             NSString* jsToInject = [NSString stringWithFormat:jsWrapper, sourceString];
-            [self.inAppBrowserViewController.webView stringByEvaluatingJavaScriptFromString:jsToInject];
+            [self.JnBrowserViewController.webView stringByEvaluatingJavaScriptFromString:jsToInject];
         }
     } else {
-        [self.inAppBrowserViewController.webView stringByEvaluatingJavaScriptFromString:source];
+        [self.JnBrowserViewController.webView stringByEvaluatingJavaScriptFromString:source];
     }
 }
 
@@ -374,7 +374,7 @@
     NSError *err = nil;
     // Initialize on first use
     if (self.callbackIdPattern == nil) {
-        self.callbackIdPattern = [NSRegularExpression regularExpressionWithPattern:@"^InAppBrowser[0-9]{1,10}$" options:0 error:&err];
+        self.callbackIdPattern = [NSRegularExpression regularExpressionWithPattern:@"^JnBrowser[0-9]{1,10}$" options:0 error:&err];
         if (err != nil) {
             // Couldn't initialize Regex; No is safer than Yes.
             return NO;
@@ -458,7 +458,7 @@
 {
     if (self.callbackId != nil) {
         // TODO: It would be more useful to return the URL the page is actually on (e.g. if it's been redirected).
-        NSString* url = [self.inAppBrowserViewController.currentURL absoluteString];
+        NSString* url = [self.JnBrowserViewController.currentURL absoluteString];
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                       messageAsDictionary:@{@"type":@"loadstop", @"url":url}];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -470,7 +470,7 @@
 - (void)webView:(UIWebView*)theWebView didFailLoadWithError:(NSError*)error
 {
     if (self.callbackId != nil) {
-        NSString* url = [self.inAppBrowserViewController.currentURL absoluteString];
+        NSString* url = [self.JnBrowserViewController.currentURL absoluteString];
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                       messageAsDictionary:@{@"type":@"loaderror", @"url":url, @"code": [NSNumber numberWithInteger:error.code], @"message": error.localizedDescription}];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -504,13 +504,13 @@
 
 @end
 
-#pragma mark CDVInAppBrowserViewController
+#pragma mark JnBrowserViewController
 
-@implementation CDVInAppBrowserViewController
+@implementation JnBrowserViewController
 
 @synthesize currentURL;
 
-- (id)initWithUserAgent:(NSString*)userAgent prevUserAgent:(NSString*)prevUserAgent browserOptions: (CDVInAppBrowserOptions*) browserOptions
+- (id)initWithUserAgent:(NSString*)userAgent prevUserAgent:(NSString*)prevUserAgent browserOptions: (JnBrowserOptions*) browserOptions
 {
     self = [super init];
     if (self != nil) {
@@ -539,7 +539,7 @@
     // We create the views in code for primarily for ease of upgrades and not requiring an external .xib to be included
 
     CGRect webViewBounds = self.view.bounds;
-    BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop];
+    BOOL toolbarIsAtBottom = ![_browserOptions.toolbarposition isEqualToString:kJnBrowserToolbarBarPositionTop];
     webViewBounds.size.height -= _browserOptions.location ? FOOTER_HEIGHT : TOOLBAR_HEIGHT;
     self.webView = [[UIWebView alloc] initWithFrame:webViewBounds];
 
@@ -748,7 +748,7 @@
             self.toolbar.frame = toolbarFrame;
         }
 
-        if ([toolbarPosition isEqualToString:kInAppBrowserToolbarBarPositionTop]) {
+        if ([toolbarPosition isEqualToString:kJnBrowserToolbarBarPositionTop]) {
             toolbarFrame.origin.y = 0;
             webViewBounds.origin.y += toolbarFrame.size.height;
             [self setWebViewFrame:webViewBounds];
@@ -828,7 +828,7 @@
     if (_userAgentLockToken != 0) {
         [self.webView loadRequest:request];
     } else {
-        __weak CDVInAppBrowserViewController* weakSelf = self;
+        __weak JnBrowserViewController* weakSelf = self;
         [CDVUserAgentUtil acquireLock:^(NSInteger lockToken) {
             _userAgentLockToken = lockToken;
             [CDVUserAgentUtil setUserAgent:_userAgent lockToken:lockToken];
@@ -869,7 +869,7 @@
 }
 
 - (void) rePositionViews {
-    if ([_browserOptions.toolbarposition isEqualToString:kInAppBrowserToolbarBarPositionTop]) {
+    if ([_browserOptions.toolbarposition isEqualToString:kJnBrowserToolbarBarPositionTop]) {
         [self.webView setFrame:CGRectMake(self.webView.frame.origin.x, TOOLBAR_HEIGHT, self.webView.frame.size.width, self.webView.frame.size.height)];
         [self.toolbar setFrame:CGRectMake(self.toolbar.frame.origin.x, [self getStatusBarOffset], self.toolbar.frame.size.width, self.toolbar.frame.size.height)];
     }
@@ -968,7 +968,7 @@
 
 @end
 
-@implementation CDVInAppBrowserOptions
+@implementation JnBrowserOptions
 
 - (id)init
 {
@@ -977,7 +977,7 @@
         self.location = YES;
         self.toolbar = YES;
         self.closebuttoncaption = nil;
-        self.toolbarposition = kInAppBrowserToolbarBarPositionBottom;
+        self.toolbarposition = kJnBrowserToolbarBarPositionBottom;
         self.clearcache = NO;
         self.clearsessioncache = NO;
 
@@ -993,9 +993,9 @@
     return self;
 }
 
-+ (CDVInAppBrowserOptions*)parseOptions:(NSString*)options
++ (JnBrowserOptions*)parseOptions:(NSString*)options
 {
-    CDVInAppBrowserOptions* obj = [[CDVInAppBrowserOptions alloc] init];
+    JnBrowserOptions* obj = [[JnBrowserOptions alloc] init];
 
     // NOTE: this parsing does not handle quotes within values
     NSArray* pairs = [options componentsSeparatedByString:@","];
@@ -1032,7 +1032,7 @@
 
 @end
 
-@implementation CDVInAppBrowserNavigationController : UINavigationController
+@implementation JnBrowserNavigationController : UINavigationController
 
 - (void) dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
     if ( self.presentedViewController) {

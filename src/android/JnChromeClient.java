@@ -16,7 +16,7 @@
        specific language governing permissions and limitations
        under the License.
 */
-package org.apache.cordova.inappbrowser;
+package com.jn.browser;
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.LOG;
@@ -24,20 +24,20 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.amazon.android.webkit.AmazonWebChromeClient;
-import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
-import com.amazon.android.webkit.AmazonJsPromptResult;
-import com.amazon.android.webkit.AmazonWebStorage;
-import com.amazon.android.webkit.AmazonWebView;
-import com.amazon.android.webkit.AmazonWebViewClient;
+import android.webkit.JsPromptResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebStorage;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.GeolocationPermissions.Callback;
 
-public class InAppChromeClient extends AmazonWebChromeClient {
+public class JnChromeClient extends WebChromeClient {
 
     private CordovaWebView webView;
     private String LOG_TAG = "InAppChromeClient";
     private long MAX_QUOTA = 100 * 1024 * 1024;
 
-    public InAppChromeClient(CordovaWebView webView) {
+    public JnChromeClient(CordovaWebView webView) {
         super();
         this.webView = webView;
     }
@@ -53,23 +53,10 @@ public class InAppChromeClient extends AmazonWebChromeClient {
      */
     @Override
     public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
-            long totalUsedQuota, AmazonWebStorage.QuotaUpdater quotaUpdater)
+            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater)
     {
         LOG.d(LOG_TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
-
-        if (estimatedSize < MAX_QUOTA)
-        {
-            //increase for 1Mb
-            long newQuota = estimatedSize;
-            LOG.d(LOG_TAG, "calling quotaUpdater.updateQuota newQuota: %d", newQuota);
-            quotaUpdater.updateQuota(newQuota);
-        }
-        else
-        {
-            // Set the quota to whatever it is and force an error
-            // TODO: get docs on how to handle this properly
-            quotaUpdater.updateQuota(currentQuota);
-        }
+        quotaUpdater.updateQuota(MAX_QUOTA);
     }
 
     /**
@@ -111,7 +98,7 @@ public class InAppChromeClient extends AmazonWebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsPrompt(AmazonWebView view, String url, String message, String defaultValue, AmazonJsPromptResult result) {
+    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
         // See if the prompt string uses the 'gap-iab' protocol. If so, the remainder should be the id of a callback to execute.
         if (defaultValue != null && defaultValue.startsWith("gap")) {
             if(defaultValue.startsWith("gap-iab://")) {
