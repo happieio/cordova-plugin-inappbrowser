@@ -421,6 +421,11 @@ public class JnBrowser extends CordovaPlugin {
             @Override
             public void run() {
                 final WebView childView = JnWebView;
+            	if (dialog != null) {
+                    dialog.dismiss();
+                    //dialog = null;
+                }
+                /*final WebView childView = JnWebView;
                 // The JS protects against multiple calls, so this should happen only when
                 // closeDialog() is called by other native code.
                 if (childView == null) {
@@ -439,7 +444,7 @@ public class JnBrowser extends CordovaPlugin {
                 // NB: From SDK 19: "If you call methods on WebView from any thread
                 // other than your app's UI thread, it can cause unexpected results."
                 // http://developer.android.com/guide/webapps/migrating.html#Threads
-                childView.loadUrl("about:blank");
+                //childView.loadUrl("about:blank");
 
                 try {
                     JSONObject obj = new JSONObject();
@@ -447,7 +452,7 @@ public class JnBrowser extends CordovaPlugin {
                     sendUpdate(obj, false);
                 } catch (JSONException ex) {
                     LOG.d(LOG_TAG, "Should never happen");
-                }
+                }*/
             }
         });
     }

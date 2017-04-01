@@ -803,7 +803,7 @@
 - (void)close
 {
     [CDVUserAgentUtil releaseLock:&_userAgentLockToken];
-    self.currentURL = nil;
+    //self.currentURL = nil;
 
     if ((self.navigationDelegate != nil) && [self.navigationDelegate respondsToSelector:@selector(browserExit)]) {
         [self.navigationDelegate browserExit];
