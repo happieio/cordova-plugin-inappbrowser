@@ -30,27 +30,27 @@ import org.json.JSONObject;
  */
 public class JnBrowserDialog extends Dialog {
     Context context;
-    JnBrowser inAppBrowser = null;
+    JnBrowser JnBrowser = null;
 
     public JnBrowserDialog(Context context, int theme) {
         super(context, theme);
         this.context = context;
     }
 
-    public void setInAppBroswer(InAppBrowser browser) {
-        this.inAppBrowser = browser;
+    public void setJnBroswer(JnBrowser browser) {
+        this.JnBrowser = browser;
     }
 
     public void onBackPressed () {
-        if (this.inAppBrowser == null) {
+        if (this.JnBrowser == null) {
             this.dismiss();
         } else {
             // better to go through the in inAppBrowser
             // because it does a clean up
-            if (this.inAppBrowser.hardwareBack() && this.inAppBrowser.canGoBack()) {
-                this.inAppBrowser.goBack();
+            if (this.JnBrowser.hardwareBack() && this.JnBrowser.canGoBack()) {
+                this.JnBrowser.goBack();
             }  else {
-                this.inAppBrowser.closeDialog();
+                this.JnBrowser.closeDialog();
             }
         }
     }
