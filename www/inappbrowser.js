@@ -31,7 +31,7 @@
     var modulemapper = require('cordova/modulemapper');
     var urlutil = require('cordova/urlutil');
 
-    function InAppBrowser() {
+    function JnBrowser() {
        this.channels = {
             'loadstart': channel.create('loadstart'),
             'loadstop' : channel.create('loadstop'),
@@ -40,20 +40,20 @@
        };
     }
 
-    InAppBrowser.prototype = {
+    JnBrowser.prototype = {
         _eventHandler: function (event) {
             if (event && (event.type in this.channels)) {
                 this.channels[event.type].fire(event);
             }
         },
         close: function (eventname) {
-            exec(null, null, "InAppBrowser", "close", []);
+            exec(null, null, "JnBrowser", "close", []);
         },
         show: function (eventname) {
-            exec(null, null, "InAppBrowser", "show", []);
+            exec(null, null, "JnBrowser", "show", []);
         },
         hide: function (eventname) {
-            exec(null, null, "InAppBrowser", "hide", []);
+            exec(null, null, "JnBrowser", "hide", []);
         },
         addEventListener: function (eventname,f) {
             if (eventname in this.channels) {
@@ -68,9 +68,9 @@
 
         executeScript: function(injectDetails, cb) {
             if (injectDetails.code) {
-                exec(cb, null, "InAppBrowser", "injectScriptCode", [injectDetails.code, !!cb]);
+                exec(cb, null, "JnBrowser", "injectScriptCode", [injectDetails.code, !!cb]);
             } else if (injectDetails.file) {
-                exec(cb, null, "InAppBrowser", "injectScriptFile", [injectDetails.file, !!cb]);
+                exec(cb, null, "JnBrowser", "injectScriptFile", [injectDetails.file, !!cb]);
             } else {
                 throw new Error('executeScript requires exactly one of code or file to be specified');
             }
@@ -78,9 +78,9 @@
 
         insertCSS: function(injectDetails, cb) {
             if (injectDetails.code) {
-                exec(cb, null, "InAppBrowser", "injectStyleCode", [injectDetails.code, !!cb]);
+                exec(cb, null, "JnBrowser", "injectStyleCode", [injectDetails.code, !!cb]);
             } else if (injectDetails.file) {
-                exec(cb, null, "InAppBrowser", "injectStyleFile", [injectDetails.file, !!cb]);
+                exec(cb, null, "JnBrowser", "injectStyleFile", [injectDetails.file, !!cb]);
             } else {
                 throw new Error('insertCSS requires exactly one of code or file to be specified');
             }
@@ -95,7 +95,7 @@
         }
 
         strUrl = urlutil.makeAbsolute(strUrl);
-        var iab = new InAppBrowser();
+        var iab = new JnBrowser();
 
         callbacks = callbacks || {};
         for (var callbackName in callbacks) {
@@ -108,7 +108,7 @@
 
         strWindowFeatures = strWindowFeatures || "";
 
-        exec(cb, cb, "InAppBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
+        exec(cb, cb, "JnBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
         return iab;
     };
 })();
