@@ -95,20 +95,20 @@
         }
 
         strUrl = urlutil.makeAbsolute(strUrl);
-        var iab = new JnBrowser();
+        var jnb = new JnBrowser();
 
         callbacks = callbacks || {};
         for (var callbackName in callbacks) {
-            iab.addEventListener(callbackName, callbacks[callbackName]);
+            jnb.addEventListener(callbackName, callbacks[callbackName]);
         }
 
         var cb = function(eventname) {
-           iab._eventHandler(eventname);
+           jnb._eventHandler(eventname);
         };
 
         strWindowFeatures = strWindowFeatures || "";
 
         exec(cb, cb, "JnBrowser", "open", [strUrl, strWindowName, strWindowFeatures]);
-        return iab;
+        return jnb;
     };
 })();
