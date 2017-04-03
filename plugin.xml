@@ -64,7 +64,7 @@
 
     <!-- ios -->
     <platform name="ios">
-        <js-module src="www/inappbrowser.js" name="jnbrowser">
+        <js-module src="www/jnbrowser.js" name="jnbrowser">
             <clobbers target="JnBrowser.open" />
         </js-module>
         <config-file target="config.xml" parent="/*">
