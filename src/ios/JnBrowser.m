@@ -387,15 +387,15 @@
 }
 
 /**
- * The iframe bridge provided for the InAppBrowser is capable of executing any oustanding callback belonging
- * to the InAppBrowser plugin. Care has been taken that other callbacks cannot be triggered, and that no
+ * The iframe bridge provided for the JnBrowser is capable of executing any oustanding callback belonging
+ * to the JnBrowser plugin. Care has been taken that other callbacks cannot be triggered, and that no
  * other code execution is possible.
  *
  * To trigger the bridge, the iframe (or any other resource) should attempt to load a url of the form:
  *
  * gap-iab://<callbackId>/<arguments>
  *
- * where <callbackId> is the string id of the callback to trigger (something like "InAppBrowser0123456789")
+ * where <callbackId> is the string id of the callback to trigger (something like "JnBrowser0123456789")
  *
  * If present, the path component of the special gap-iab:// url is expected to be a URL-escaped JSON-encoded
  * value to pass to the callback. [NSURL path] should take care of the URL-unescaping, and a JSON_EXCEPTION
@@ -824,17 +824,17 @@
 - (void)navigateTo:(NSURL*)url
 {
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
-
-    if (_userAgentLockToken != 0) {
-        [self.webView loadRequest:request];
-    } else {
-        __weak JnBrowserViewController* weakSelf = self;
-        [CDVUserAgentUtil acquireLock:^(NSInteger lockToken) {
-            _userAgentLockToken = lockToken;
-            [CDVUserAgentUtil setUserAgent:_userAgent lockToken:lockToken];
-            [weakSelf.webView loadRequest:request];
-        }];
-    }
+    [self.webView loadRequest:request];
+//    if (_userAgentLockToken != 0) {
+//
+//    } else {
+//        __weak JnBrowserViewController* weakSelf = self;
+//        [CDVUserAgentUtil acquireLock:^(NSInteger lockToken) {
+//            _userAgentLockToken = lockToken;
+//            [CDVUserAgentUtil setUserAgent:_userAgent lockToken:lockToken];
+//            [weakSelf.webView loadRequest:request];
+//        }];
+//    }
 }
 
 - (void)goBack:(id)sender
