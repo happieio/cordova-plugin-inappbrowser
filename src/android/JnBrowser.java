@@ -730,6 +730,8 @@ public class JnBrowser extends CordovaPlugin {
                 });
 
                 // WebView
+                //JnWebView.getSettings().setJavaScriptEnabled(true);
+                //JnWebView.getSettings().setDomStorageEnabled(true);
                 JnWebView = new WebView(cordova.getActivity());
                 JnWebView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
                 JnWebView.setId(Integer.valueOf(6));
@@ -948,56 +950,56 @@ public class JnBrowser extends CordovaPlugin {
          */
         @Override
         public boolean shouldOverrideUrlLoading(WebView webView, String url) {
-            if (url.startsWith(WebView.SCHEME_TEL)) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse(url));
-                    cordova.getActivity().startActivity(intent);
-                    return true;
-                } catch (android.content.ActivityNotFoundException e) {
-                    LOG.e(LOG_TAG, "Error dialing " + url + ": " + e.toString());
-                }
-            } else if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url.startsWith("market:") || url.startsWith("intent:")) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(url));
-                    cordova.getActivity().startActivity(intent);
-                    return true;
-                } catch (android.content.ActivityNotFoundException e) {
-                    LOG.e(LOG_TAG, "Error with " + url + ": " + e.toString());
-                }
-            }
-            // If sms:5551212?body=This is the message
-            else if (url.startsWith("sms:")) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-
-                    // Get address
-                    String address = null;
-                    int parmIndex = url.indexOf('?');
-                    if (parmIndex == -1) {
-                        address = url.substring(4);
-                    } else {
-                        address = url.substring(4, parmIndex);
-
-                        // If body, then set sms body
-                        Uri uri = Uri.parse(url);
-                        String query = uri.getQuery();
-                        if (query != null) {
-                            if (query.startsWith("body=")) {
-                                intent.putExtra("sms_body", query.substring(5));
-                            }
-                        }
-                    }
-                    intent.setData(Uri.parse("sms:" + address));
-                    intent.putExtra("address", address);
-                    intent.setType("vnd.android-dir/mms-sms");
-                    cordova.getActivity().startActivity(intent);
-                    return true;
-                } catch (android.content.ActivityNotFoundException e) {
-                    LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
-                }
-            }
+//            if (url.startsWith(WebView.SCHEME_TEL)) {
+//                try {
+//                    Intent intent = new Intent(Intent.ACTION_DIAL);
+//                    intent.setData(Uri.parse(url));
+//                    cordova.getActivity().startActivity(intent);
+//                    return true;
+//                } catch (android.content.ActivityNotFoundException e) {
+//                    LOG.e(LOG_TAG, "Error dialing " + url + ": " + e.toString());
+//                }
+//            } else if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url.startsWith("market:") || url.startsWith("intent:")) {
+//                try {
+//                    Intent intent = new Intent(Intent.ACTION_VIEW);
+//                    intent.setData(Uri.parse(url));
+//                    cordova.getActivity().startActivity(intent);
+//                    return true;
+//                } catch (android.content.ActivityNotFoundException e) {
+//                    LOG.e(LOG_TAG, "Error with " + url + ": " + e.toString());
+//                }
+//            }
+//            // If sms:5551212?body=This is the message
+//            else if (url.startsWith("sms:")) {
+//                try {
+//                    Intent intent = new Intent(Intent.ACTION_VIEW);
+//
+//                    // Get address
+//                    String address = null;
+//                    int parmIndex = url.indexOf('?');
+//                    if (parmIndex == -1) {
+//                        address = url.substring(4);
+//                    } else {
+//                        address = url.substring(4, parmIndex);
+//
+//                        // If body, then set sms body
+//                        Uri uri = Uri.parse(url);
+//                        String query = uri.getQuery();
+//                        if (query != null) {
+//                            if (query.startsWith("body=")) {
+//                                intent.putExtra("sms_body", query.substring(5));
+//                            }
+//                        }
+//                    }
+//                    intent.setData(Uri.parse("sms:" + address));
+//                    intent.putExtra("address", address);
+//                    intent.setType("vnd.android-dir/mms-sms");
+//                    cordova.getActivity().startActivity(intent);
+//                    return true;
+//                } catch (android.content.ActivityNotFoundException e) {
+//                    LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
+//                }
+//            }
             return false;
         }
 
